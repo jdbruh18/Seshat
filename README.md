@@ -1,4 +1,4 @@
-# Self-Learning AI Academic Assistant
+# Seshat: Self-Learning AI Academic Assistant
 
 A complete full-stack web application designed for students, teachers, and administrators to track study activities, monitor syllabus completion, take practice quizzes, analyze learning behavior, predict academic performance using Machine Learning, and receive personalized, rule-based study recommendations.
 

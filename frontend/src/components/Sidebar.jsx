@@ -70,7 +70,7 @@ export const Sidebar = () => {
             <GraduationCap className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">StudyAI</h1>
+            <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Seshat</h1>
             <span className="text-[10px] uppercase tracking-widest text-sky-400 font-bold">{user.role} Portal</span>
           </div>
         </div>

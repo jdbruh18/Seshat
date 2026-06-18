@@ -139,5 +139,42 @@ class TestCosmicRhythmsAndConstellationsAPI(unittest.TestCase):
         self.assertFalse(const2["stars"][1]["is_completed"])
         self.assertFalse(const2["is_completed"]) # Not fully completed yet
 
+    def test_cosmic_observatory_and_news_proxy(self):
+        """Verify that the observatory and space-news proxy routes return valid structures"""
+        student_headers = {'Authorization': f'Bearer {self.student_token}'}
+
+        # 1. Test observatory endpoint
+        response = self.client.get('/api/cosmic/observatory', headers=student_headers)
+        self.assertEqual(response.status_code, 200)
+        
+        data = json.loads(response.data)
+        self.assertIn("apod", data)
+        self.assertIn("iss", data)
+        
+        # Check structure
+        self.assertIn("title", data["apod"])
+        self.assertIn("explanation", data["apod"])
+        self.assertIn("url", data["apod"])
+        
+        self.assertIn("latitude", data["iss"])
+        self.assertIn("longitude", data["iss"])
+        self.assertIn("velocity_kmh", data["iss"])
+        self.assertIn("altitude_km", data["iss"])
+
+        # 2. Test space-news endpoint
+        news_response = self.client.get('/api/cosmic/space-news', headers=student_headers)
+        self.assertEqual(news_response.status_code, 200)
+        
+        news_data = json.loads(news_response.data)
+        self.assertTrue(isinstance(news_data, list))
+        self.assertTrue(len(news_data) > 0)
+        
+        # Check article structure
+        article = news_data[0]
+        self.assertIn("title", article)
+        self.assertIn("summary", article)
+        self.assertIn("news_site", article)
+        self.assertIn("url", article)
+
 if __name__ == '__main__':
     unittest.main()

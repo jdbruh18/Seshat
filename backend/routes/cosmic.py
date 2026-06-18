@@ -270,3 +270,117 @@ def get_cosmic_rhythm():
         "scientific_insight": insight,
         "constellations": constellations
     }), 200
+
+def fetch_json_safe(url):
+    import urllib.request
+    import json
+    import sys
+    try:
+        req = urllib.request.Request(
+            url, 
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        )
+        with urllib.request.urlopen(req, timeout=4) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        # Silently print to stderr so it doesn't pollute stdout for MCP
+        print(f"Observatory fetch error for {url}: {e}", file=sys.stderr)
+        return None
+
+@cosmic_bp.route('/observatory', methods=['GET'])
+@jwt_required()
+def get_observatory_data():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user or user.role != 'student' or not user.student:
+        return jsonify({'message': 'Unauthorized. Student role required.'}), 403
+
+    # 1. Fetch NASA APOD (Astronomy Picture of the Day)
+    apod = fetch_json_safe("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+    if not apod:
+        # Fallback APOD content
+        apod = {
+            "title": "The Eagle Nebula's Pillars of Creation",
+            "explanation": "A stellar nursery of cool interstellar gas and dust. This iconic landscape shows columns of gas illuminated by the intense radiation of nearby newborn stars. It is located approximately 6,500 light-years from Earth in the constellation Serpens.",
+            "url": "https://images-assets.nasa.gov/image/PIA01522/PIA01522~orig.jpg",
+            "is_fallback": True
+        }
+
+    # 2. Fetch ISS (International Space Station) Coordinates
+    iss = fetch_json_safe("https://api.wheretheiss.at/v1/satellites/25544")
+    if not iss:
+        # Fallback coordinates (over Cairo, Egypt)
+        iss = {
+            "latitude": 30.0444,
+            "longitude": 31.2357,
+            "altitude": 421.8,
+            "velocity": 27584.2,
+            "name": "iss",
+            "is_fallback": True
+        }
+
+    return jsonify({
+        "apod": {
+            "title": apod.get("title"),
+            "explanation": apod.get("explanation"),
+            "url": apod.get("url") or apod.get("hdurl"),
+            "is_fallback": apod.get("is_fallback", False)
+        },
+        "iss": {
+            "latitude": round(float(iss.get("latitude", 0)), 4),
+            "longitude": round(float(iss.get("longitude", 0)), 4),
+            "altitude_km": round(float(iss.get("altitude", 0)), 1),
+            "velocity_kmh": round(float(iss.get("velocity", 0)), 1),
+            "is_fallback": iss.get("is_fallback", False)
+        }
+    }), 200
+
+@cosmic_bp.route('/space-news', methods=['GET'])
+@jwt_required()
+def get_space_news():
+    user_id = int(get_jwt_identity())
+    user = db.session.get(User, user_id)
+    if not user or user.role != 'student' or not user.student:
+        return jsonify({'message': 'Unauthorized. Student role required.'}), 403
+
+    # Fetch 3 latest aerospace articles from Spaceflight News API
+    news = fetch_json_safe("https://api.spaceflightnewsapi.net/v4/articles/?limit=3")
+    
+    articles = []
+    if news and isinstance(news, dict) and "results" in news:
+        for article in news["results"]:
+            articles.append({
+                "title": article.get("title"),
+                "summary": article.get("summary", ""),
+                "news_site": article.get("news_site", "Aerospace News"),
+                "url": article.get("url"),
+                "image_url": article.get("image_url")
+            })
+            
+    if not articles:
+        # Fallback space articles
+        articles = [
+            {
+                "title": "NASA's Voyager 1 Restores Full Data Transmission After Signal Glitch",
+                "summary": "NASA's most distant space probe, launched in 1977, successfully bypasses corrupted memory to send pristine engineering and science readings from interstellar space.",
+                "news_site": "NASA Science",
+                "url": "https://science.nasa.gov/missions/voyager/voyager-1/",
+                "image_url": "https://images-assets.nasa.gov/image/PIA22946/PIA22946~orig.jpg"
+            },
+            {
+                "title": "ISS Astronauts Conduct Core Solar Array Spacewalk Upgrades",
+                "summary": "Astronauts successfully installed advanced roll-out solar arrays (iROSA) to boost the space station's overall power grid by 30% for future scientific research operations.",
+                "news_site": "ESA Portal",
+                "url": "https://www.esa.int",
+                "image_url": "https://images-assets.nasa.gov/image/iss069e023450/iss069e023450~orig.jpg"
+            },
+            {
+                "title": "James Webb Space Telescope Maps Organic Molecules in Deep Space Constellations",
+                "summary": "Astronomers detected complex organic carbon compounds in the dark molecular clouds of Taurus constellation, unlocking secrets of planet-forming discs.",
+                "news_site": "STScI",
+                "url": "https://webbtelescope.org",
+                "image_url": "https://images-assets.nasa.gov/image/hubble-stellar-nursery/hubble-stellar-nursery~orig.jpg"
+            }
+        ]
+
+    return jsonify(articles), 200

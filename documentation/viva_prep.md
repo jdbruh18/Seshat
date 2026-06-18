@@ -202,6 +202,9 @@ This table details the unit testing checkpoints written under `backend/test_*.py
 | `test_analytics_recs.py` | `test_analytics_dashboard` | Check completion rates & strengths | `GET /api/analytics/dashboard` | Returns active streaks & subject tags. |
 | `test_analytics_recs.py` | `test_recommendations` | Verify rule-based advisory triggers | `GET /api/recommendations` | Triggers alert recommendation for low progress. |
 | `test_predictions.py` | `test_exam_predictions` | Call ML predictor using Random Forest | `GET /api/predictions/predict` | Returns predicted score (0-100) and grade (A-F). |
+| `test_cosmic.py` | `test_default_chronotype_and_constellations` | Verify default fallback chronotype | `GET /api/cosmic/rhythm` | HTTP 200, returns "Golden Bear" & empty constellations |
+| `test_cosmic.py` | `test_chronotype_classification_lark_and_constellation_stars` | Verify study hour maps to Lark and maps topics | `GET /api/cosmic/rhythm` | HTTP 200, maps Lark, connects topics to star coordinates |
+| `test_cosmic.py` | `test_cosmic_observatory_and_news_proxy` | Verify ISS & NASA APOD telemetry with fallbacks | `GET /api/cosmic/observatory` | HTTP 200, handles timeouts, returns valid proxy struct |
 
 ---
 
@@ -237,11 +240,18 @@ This table details the unit testing checkpoints written under `backend/test_*.py
     *   If `False`, the system automatically spins up a local **SQLite** file database (`database.db`) in the `backend` folder. No configuration, driver installation, or SQL servers are required. This ensures a zero-setup presentation.
     *   If `True`, Flask connects to a **MySQL** server using `PyMySQL` and the standard connection URI configured by the evaluator.
 
+### Q6: What is the Cosmic Portal & Live Observatory feature? How is it implemented?
+*   **Answer**:
+    1.  **Chronobiology classification**: Classified dynamically on `/api/cosmic/rhythm` by analyzing study hour distribution (Morning Lark, Night Owl, Golden Bear, Midnight Nebula) to yield science-backed cognitive insights.
+    2.  **Constellation Mapper**: Maps syllabus topics of each subject to interactive night-sky SVG coordinates. Completed topics glow gold and display astronomical facts.
+    3.  **Observatory API Proxy**: Safe server-side endpoint calling NASA's Astronomy Picture of the Day (APOD) API and ISS Live Tracker telemetry (latitude, longitude, altitude, velocity).
+    4.  **Resilience**: Direct browser requests are avoided to prevent CORS/mixed-content blocks. The proxy catches rate limits, offline states, and SSL handshake timeouts, serving rich cached/fallback structures seamlessly.
+
 ---
 
 ## 📋 Viva Presentation Deck Structure (Suggested)
 
-If you need to prepare a presentation slide deck (e.g., MS PowerPoint), here is a recommended 6-slide structure:
+If you need to prepare a presentation slide deck (e.g., MS PowerPoint), here is a recommended 7-slide structure:
 
 1.  **Slide 1: Project Title & Objective**
     *   *Self-Learning AI Academic Assistant*.
@@ -256,6 +266,9 @@ If you need to prepare a presentation slide deck (e.g., MS PowerPoint), here is 
     *   Random Forest Regressor. Explain features (Hours, Quizzes, Completion) and R-squared metric (over 95% accuracy on trained synthetic data).
 5.  **Slide 5: Dashboards & Advisory Roles**
     *   Demonstrate Student Dashboard (weekly trends, strengths/weaknesses), Teacher Dashboard (subject aggregates, weak topics), and Admin Dashboard (user management).
-6.  **Slide 6: Project Summary & Viva Checklist**
-    *   11/11 successful backend automated test suites.
+6.  **Slide 6: Cosmic Portal & Chronobiology**
+    *   Visual Constellation progress mapping and student study rhythm analytics.
+    *   Server-side proxies for ISS real-time location maps, NASA APOD telemetry, and offline fallback handlers.
+7.  **Slide 7: Project Summary & Viva Checklist**
+    *   16/16 successful backend automated tests.
     *   Key takeaways: easy-to-use visual checklist interface, automated ML sync, and simple configuration options.

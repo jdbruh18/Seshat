@@ -299,3 +299,87 @@ This document provides detailed API specifications for the **Self-Learning AI Ac
       }
     ]
     ```
+
+---
+
+## 7. Cosmic Portal & Observatory Module (`/api/cosmic`)
+
+### Get Cosmic Rhythms & Constellations
+*   **Endpoint**: `GET /rhythm`
+*   **Headers**: `Authorization: Bearer <token>`
+*   **Response (200 OK)**:
+    ```json
+    {
+      "chronotype": "Morning Lark (Lion)",
+      "chronotype_key": "morning_lark",
+      "chronotype_description": "Peak cognitive efficiency in the early morning. Best for heavy analytical subjects.",
+      "hourly_distribution": [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "scientific_insight": "Your biological clock shows peak cognitive efficiency between 6 AM and 11 AM (Morning Lark). Allocate a 90-minute deep-work block right after breakfast to maximize focus on your weakest subject, **Astronomy**.",
+      "constellations": [
+        {
+          "subject_id": 1,
+          "subject_name": "Astronomy",
+          "constellation_name": "Ursa Major (The Great Bear)",
+          "stars": [
+            {
+              "topic_id": 1,
+              "topic_name": "Sunspots",
+              "star_name": "Dubhe",
+              "x": 35,
+              "y": 20,
+              "is_completed": true
+            },
+            {
+              "topic_id": 2,
+              "topic_name": "Solar Flares",
+              "star_name": "Merak",
+              "x": 30,
+              "y": 35,
+              "is_completed": false
+            }
+          ],
+          "connections": [[0, 1]],
+          "facts": "Ursa Major is one of the most famous northern constellations. Its seven brightest stars form the Big Dipper...",
+          "is_completed": false
+        }
+      ]
+    }
+    ```
+
+### Get Observatory Data (ISS Coordinates & NASA APOD)
+*   **Endpoint**: `GET /observatory`
+*   **Headers**: `Authorization: Bearer <token>`
+*   **Response (200 OK)**:
+    ```json
+    {
+      "apod": {
+        "title": "The Eagle Nebula's Pillars of Creation",
+        "explanation": "A stellar nursery of cool interstellar gas and dust. This iconic landscape shows columns of gas...",
+        "url": "https://images-assets.nasa.gov/image/PIA01522/PIA01522~orig.jpg",
+        "is_fallback": false
+      },
+      "iss": {
+        "latitude": 30.0444,
+        "longitude": 31.2357,
+        "altitude_km": 421.8,
+        "velocity_kmh": 27584.2,
+        "is_fallback": false
+      }
+    }
+    ```
+
+### Get Space Exploration News Feed
+*   **Endpoint**: `GET /space-news`
+*   **Headers**: `Authorization: Bearer <token>`
+*   **Response (200 OK)**:
+    ```json
+    [
+      {
+        "title": "NASA's Voyager 1 Restores Full Data Transmission After Signal Glitch",
+        "summary": "NASA's most distant space probe, launched in 1977, successfully bypasses corrupted memory...",
+        "news_site": "NASA Science",
+        "url": "https://science.nasa.gov/missions/voyager/voyager-1/",
+        "image_url": "https://images-assets.nasa.gov/image/PIA22946/PIA22946~orig.jpg"
+      }
+    ]
+    ```

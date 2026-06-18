@@ -14,6 +14,7 @@ This project is built specifically as an **MCA (Master of Computer Applications)
 *   **Interactive MCQ Quiz Engine**: Pre-built mock exams with randomized multiple-choice questions, live timer, and score submission features.
 *   **AI Study Advisor (Recommendation Engine)**: A rule-based engine that evaluates student activity (quiz performance, syllabus completion, inactivity) and writes actionable recommendations to the database.
 *   **Performance Predictor (Scikit-Learn ML)**: A trained **Random Forest Regressor** model running on the backend that reads the student's study logs and quiz grades to predict their final exam percentage and letter grade.
+*   **Cosmic Portal & Live Observatory**: An engaging space science interface mapping student curriculum progress to interactive constellation stars. Includes chronobiology study archetype analytics (Morning Lark, Night Owl) with science-backed study advice, real-time ISS satellite tracking, NASA APOD space photography, and aerospace news feeds.
 
 ---
 
@@ -45,7 +46,14 @@ academic_assistant/
 │   │   ├── quizzes.py         # Quiz builder, player, & grading routes
 │   │   ├── analytics.py       # Dashboards (Student, Teacher, Admin) aggregates
 │   │   ├── recommendations.py # Rule-based study suggestions manager
-│   │   └── predictions.py     # Random Forest model predictor endpoint
+│   │   ├── predictions.py     # Random Forest model predictor endpoint
+│   │   └── cosmic.py          # Chronotype metrics, constellations, and space API proxy
+│   ├── test_auth.py           # Auth and Google Login unit tests
+│   ├── test_subjects_study.py # Course and study logging unit tests
+│   ├── test_quizzes.py        # Quiz and progress unit tests
+│   ├── test_analytics_recs.py # Dashboard stats and rule recommendations unit tests
+│   ├── test_predictions.py    # Random Forest regression model unit tests
+│   ├── test_cosmic.py         # Chronotype, constellation map, and space API unit tests
 │   └── venv/                  # Python virtual environment (ignored)
 ├── database/
 │   └── schema.sql             # SQL script for manual MySQL execution
@@ -55,7 +63,7 @@ academic_assistant/
 │   ├── src/
 │   │   ├── components/        # ProtectedRoute, Sidebar layout
 │   │   ├── context/           # JWT AuthContext
-│   │   ├── pages/             # Login, Register, Profile, Dashboards, Quizzes, Tracker
+│   │   ├── pages/             # Login, Register, Profile, Dashboards, Quizzes, Tracker, StarChart (Cosmic Portal)
 │   │   ├── App.jsx            # React Router configurations
 │   │   ├── main.jsx           # App entrypoint
 │   │   └── index.css          # Main styling & custom glassmorphism styles
@@ -162,7 +170,7 @@ To ensure the backend APIs function correctly, a comprehensive suite of unit tes
     ```bash
     python -m unittest discover -p "test_*.py"
     ```
-    This will run all test suites (Authentication, Subject Builder, Study Logging, Quizzes, Analytics, recommendations, and ML Predictions) and report validation results.
+    This will run all test suites (Authentication, Subject Builder, Study Logging, Quizzes, Analytics, Recommendations, ML Predictions, and Cosmic Portal/Observatory) and report validation results.
 
 ---
 

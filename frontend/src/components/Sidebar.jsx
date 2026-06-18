@@ -12,7 +12,8 @@ import {
   Users, 
   Settings, 
   GraduationCap,
-  PlusSquare
+  PlusSquare,
+  Sparkles
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -33,6 +34,7 @@ export const Sidebar = () => {
     { to: '/study-tracker', label: 'Study Logger', icon: Clock },
     { to: '/quizzes', label: 'Quizzes', icon: Award },
     { to: '/recommendations', label: 'AI Advisor', icon: Lightbulb },
+    { to: '/star-chart', label: 'Cosmic Rhythm', icon: Sparkles },
     { to: '/profile', label: 'My Profile', icon: User },
   ];
 

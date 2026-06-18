@@ -10,6 +10,7 @@ from routes.analytics import analytics_bp
 from routes.quizzes import quizzes_bp
 from routes.recommendations import recommendations_bp
 from routes.predictions import predictions_bp
+from routes.cosmic import cosmic_bp
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -32,6 +33,7 @@ def create_app(config_class=Config):
     app.register_blueprint(quizzes_bp, url_prefix='/api/quizzes')
     app.register_blueprint(recommendations_bp, url_prefix='/api/recommendations')
     app.register_blueprint(predictions_bp, url_prefix='/api/predictions')
+    app.register_blueprint(cosmic_bp, url_prefix='/api/cosmic')
 
     # Register healthcheck
     @app.route('/api/health', methods=['GET'])

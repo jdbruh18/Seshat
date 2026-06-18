@@ -12,6 +12,7 @@ import { StudyTracker } from './pages/StudyTracker';
 import { Quizzes } from './pages/Quizzes';
 import { Recommendations } from './pages/Recommendations';
 import { StudentDashboard } from './pages/StudentDashboard';
+import { StarChart } from './pages/StarChart';
 
 import { TeacherDashboard } from './pages/TeacherDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -94,6 +95,11 @@ function App() {
             <Route path="/recommendations" element={
               <ProtectedRoute allowedRoles={['student']}>
                 <Recommendations />
+              </ProtectedRoute>
+            } />
+            <Route path="/star-chart" element={
+              <ProtectedRoute allowedRoles={['student']}>
+                <StarChart />
               </ProtectedRoute>
             } />
 

@@ -165,5 +165,32 @@ class TestAuthenticationAPI(unittest.TestCase):
         self.assertEqual(user.student.course, 'AI & ML')
         self.assertEqual(user.student.semester, 3)
 
+    def test_google_login_flow(self):
+        """Test mock Google Login and automatic profile provisioning"""
+        # 1. Attempt login with missing ID token
+        response = self.client.post('/api/auth/google',
+                                    data=json.dumps({}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+
+        # 2. Login with valid ID token (first time, so auto-provisions)
+        payload = {"id_token": "mock-google-id-token-123"}
+        response = self.client.post('/api/auth/google',
+                                    data=json.dumps(payload),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn("token", data)
+        self.assertEqual(data["user"]["email"], "google_student@test.com")
+        self.assertEqual(data["user"]["full_name"], "Google Scholar")
+
+        # 3. Login again (already provisioned)
+        response2 = self.client.post('/api/auth/google',
+                                     data=json.dumps(payload),
+                                     content_type='application/json')
+        self.assertEqual(response2.status_code, 200)
+        data2 = json.loads(response2.data)
+        self.assertEqual(data2["user"]["email"], "google_student@test.com")
+
 if __name__ == '__main__':
     unittest.main()

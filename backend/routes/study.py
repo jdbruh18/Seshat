@@ -2,7 +2,7 @@ import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from database import db
-from models import User, StudyLog, Subject, Topic, Student
+from models import User, StudyLog, Subject, Topic, Student, encrypt_text
 
 study_bp = Blueprint('study', __name__)
 
@@ -65,7 +65,7 @@ def log_study_session():
             topic_id=topic_id,
             study_date=study_date,
             duration_minutes=duration,
-            notes=notes
+            notes=encrypt_text(notes)
         )
         db.session.add(log)
         db.session.commit()

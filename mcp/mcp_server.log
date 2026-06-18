@@ -1,0 +1,12 @@
+2026-06-18 14:40:39,627 - INFO - Backend imports successful.
+2026-06-18 14:40:39,733 - INFO - Starting local MCP stdio server...
+2026-06-18 14:40:39,733 - INFO - Received message: {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "TestClient", "version": "1.0.0"}}}
+2026-06-18 14:40:39,738 - INFO - Sent initialize response.
+2026-06-18 14:40:57,577 - INFO - Backend imports successful.
+2026-06-18 14:40:57,670 - INFO - Starting local MCP stdio server...
+2026-06-18 14:40:57,670 - INFO - Received message: {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "TestClient", "version": "1.0.0"}}}
+2026-06-18 14:40:57,703 - INFO - Sent initialize response.
+2026-06-18 14:40:57,703 - INFO - Received message: {"jsonrpc": "2.0", "method": "notifications/initialized"}
+2026-06-18 14:40:57,703 - INFO - Client successfully initialized MCP session.
+2026-06-18 14:40:57,703 - INFO - Received message: {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
+2026-06-18 14:40:57,703 - INFO - Sent tools/list response.

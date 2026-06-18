@@ -140,6 +140,13 @@ class TestSubjectsAndStudyAPI(unittest.TestCase):
         resp = self.client.post('/api/study/log', data=json.dumps(study_payload), content_type='application/json', headers=student_headers)
         self.assertEqual(resp.status_code, 201)
 
+        # 5.5 Verify notes are stored encrypted in the database but decrypted in to_dict()
+        raw_log = StudyLog.query.filter_by(duration_minutes=120).first()
+        self.assertIsNotNone(raw_log)
+        self.assertNotEqual(raw_log.notes, "Studied derivative rules")
+        self.assertTrue(len(raw_log.notes) > 40) # Ciphertext is long base64 string
+        self.assertEqual(raw_log.to_dict()['notes'], "Studied derivative rules")
+
         # 6. Retrieve student study logs
         resp = self.client.get('/api/study/logs', headers=student_headers)
         logs = json.loads(resp.data)
@@ -154,6 +161,94 @@ class TestSubjectsAndStudyAPI(unittest.TestCase):
         self.assertEqual(stats['monthly_hours'], 2.0)
         self.assertEqual(len(stats['weekly_trend']), 7)
         self.assertEqual(stats['weekly_trend'][-1]['hours'], 2.0) # Today should show 2.0 hours
+
+    def test_data_retention_purging(self):
+        """Verify that records older than 1 year (365 days) are purged from the database"""
+        # We need a student and a subject/topic first
+        teacher_headers = {'Authorization': f'Bearer {self.teacher_token}'}
+        resp = self.client.post('/api/subjects', data=json.dumps({"subject_name": "History"}), content_type='application/json', headers=teacher_headers)
+        sub_id = json.loads(resp.data)['subject_id']
+
+        resp = self.client.post(f'/api/subjects/{sub_id}/units', data=json.dumps({"unit_name": "WWII"}), content_type='application/json', headers=teacher_headers)
+        unit_id = json.loads(resp.data)['unit_id']
+
+        resp = self.client.post(f'/api/subjects/units/{unit_id}/topics', data=json.dumps({"topic_name": "D-Day"}), content_type='application/json', headers=teacher_headers)
+        topic_id = json.loads(resp.data)['topic_id']
+
+        # Get student ID
+        from models import User, StudyLog, Quiz, QuizAttempt
+        student_user = User.query.filter_by(email="student@test.com").first()
+        student_id = student_user.student.student_id
+
+        # Create old and new study logs
+        today = datetime.date.today()
+        old_date = today - datetime.timedelta(days=366)
+        new_date = today - datetime.timedelta(days=100)
+
+        old_log = StudyLog(
+            student_id=student_id,
+            subject_id=sub_id,
+            topic_id=topic_id,
+            study_date=old_date,
+            duration_minutes=60,
+            notes="Old study log notes"
+        )
+        new_log = StudyLog(
+            student_id=student_id,
+            subject_id=sub_id,
+            topic_id=topic_id,
+            study_date=new_date,
+            duration_minutes=45,
+            notes="New study log notes"
+        )
+        db.session.add(old_log)
+        db.session.add(new_log)
+
+        # Create old and new quiz attempts
+        # First create a quiz
+        quiz = Quiz(subject_id=sub_id, title="WWII History Quiz", difficulty="Medium")
+        db.session.add(quiz)
+        db.session.commit() # save to generate quiz_id
+        quiz_id = quiz.quiz_id
+
+        now = datetime.datetime.utcnow()
+        old_time = now - datetime.timedelta(days=366)
+        new_time = now - datetime.timedelta(days=100)
+
+        old_attempt = QuizAttempt(
+            student_id=student_id,
+            quiz_id=quiz_id,
+            score=75.0,
+            attempt_date=old_time
+        )
+        new_attempt = QuizAttempt(
+            student_id=student_id,
+            quiz_id=quiz_id,
+            score=90.0,
+            attempt_date=new_time
+        )
+        db.session.add(old_attempt)
+        db.session.add(new_attempt)
+        db.session.commit()
+
+        # Check they exist in DB
+        self.assertEqual(StudyLog.query.filter_by(student_id=student_id).count(), 2)
+        self.assertEqual(QuizAttempt.query.filter_by(student_id=student_id).count(), 2)
+
+        # Run purging query logic
+        cutoff_datetime = datetime.datetime.utcnow() - datetime.timedelta(days=365)
+        cutoff_date = datetime.date.today() - datetime.timedelta(days=365)
+        
+        StudyLog.query.filter(StudyLog.study_date < cutoff_date).delete()
+        QuizAttempt.query.filter(QuizAttempt.attempt_date < cutoff_datetime).delete()
+        db.session.commit()
+
+        # Verify old records are deleted, new records remain
+        self.assertEqual(StudyLog.query.filter_by(student_id=student_id).count(), 1)
+        self.assertEqual(StudyLog.query.filter_by(student_id=student_id).first().duration_minutes, 45)
+
+        self.assertEqual(QuizAttempt.query.filter_by(student_id=student_id).count(), 1)
+        self.assertEqual(QuizAttempt.query.filter_by(student_id=student_id).first().score, 90.0)
 
 if __name__ == '__main__':
     unittest.main()

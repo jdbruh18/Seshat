@@ -1,6 +1,33 @@
 import datetime
 import bcrypt
+import base64
+import hashlib
+from cryptography.fernet import Fernet
+from config import Config
 from database import db
+
+# Helper to derive a valid 32-byte url-safe base64 key from any secret string
+def get_fernet_key(secret: str) -> bytes:
+    hashed = hashlib.sha256(secret.encode('utf-8')).digest()
+    return base64.urlsafe_b64encode(hashed)
+
+# Initialize Fernet cipher
+fernet_key = get_fernet_key(Config.SECRET_KEY)
+cipher = Fernet(fernet_key)
+
+def encrypt_text(text: str) -> str:
+    if not text:
+        return ""
+    return cipher.encrypt(text.encode('utf-8')).decode('utf-8')
+
+def decrypt_text(cipher_text: str) -> str:
+    if not cipher_text:
+        return ""
+    try:
+        return cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
+    except Exception:
+        # Fallback to returning raw text in case it was stored unencrypted
+        return cipher_text
 
 # Password hashing utilities
 def hash_password(password: str) -> str:
@@ -184,7 +211,7 @@ class StudyLog(db.Model):
             'topic_name': self.topic.topic_name if self.topic else None,
             'study_date': self.study_date.isoformat(),
             'duration_minutes': self.duration_minutes,
-            'notes': self.notes
+            'notes': decrypt_text(self.notes)
         }
 
 class Quiz(db.Model):

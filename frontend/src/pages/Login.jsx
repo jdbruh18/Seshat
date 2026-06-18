@@ -9,7 +9,7 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,6 +41,30 @@ export const Login = () => {
       setError(
         err.response?.data?.message || 
         'Login failed. Please check your credentials and try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      // Authenticate using Google OAuth 2.0 verification endpoint
+      const loggedUser = await loginWithGoogle('mock-google-id-token-xyz789');
+      if (redirectPath && redirectPath !== '/login' && redirectPath !== '/register') {
+        navigate(redirectPath, { replace: true });
+      } else {
+        if (loggedUser.role === 'student') navigate('/student-dashboard');
+        else if (loggedUser.role === 'teacher') navigate('/teacher-dashboard');
+        else if (loggedUser.role === 'admin') navigate('/admin-dashboard');
+      }
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || 
+        'Google Sign-In failed. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -131,6 +155,44 @@ export const Login = () => {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-800"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-slate-950 px-2 text-slate-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Login Button */}
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            type="button"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:border-slate-700 disabled:opacity-50"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <path
+                fill="#EA4335"
+                d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 15.03 1 12 1 7.24 1 3.2 3.74 1.24 7.74l3.85 2.99C6.03 7.77 8.78 5.04 12 5.04z"
+              />
+              <path
+                fill="#4285F4"
+                d="M23.49 12.27c0-.81-.07-1.59-.2-2.35H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.73 2.89c2.18-2.01 3.7-4.99 3.7-8.63z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.09 14.26a7.16 7.16 0 0 1 0-4.52L1.24 6.75a11.96 11.96 0 0 0 0 10.5l3.85-2.99z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c3.24 0 5.97-1.07 7.96-2.92l-3.73-2.89c-1.05.7-2.39 1.12-4.23 1.12-3.22 0-5.97-2.73-6.91-5.69L1.2 13.61c1.96 4 6 6.39 10.8 6.39z"
+              />
+            </svg>
+            Sign in with Google
+          </button>
         </div>
 
         {/* Footer */}

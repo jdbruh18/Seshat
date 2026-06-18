@@ -47,14 +47,33 @@ def create_app(config_class=Config):
     def internal_error(error):
         return jsonify({'message': 'An internal server error occurred.'}), 500
 
-    # Auto-create tables (suitable for SQLite or MySQL setup)
+    # Auto-create tables (suitable for SQLite or MySQL setup) and purge expired data
     with app.app_context():
         try:
             import models # Ensure models are imported so SQLAlchemy knows about them
             db.create_all()
             print("Database tables initialized successfully.")
+            
+            # Execute 1-year data retention purge
+            from models import StudyLog, QuizAttempt, Prediction, Recommendation
+            import datetime
+            
+            cutoff_datetime = datetime.datetime.utcnow() - datetime.timedelta(days=365)
+            cutoff_date = datetime.date.today() - datetime.timedelta(days=365)
+            
+            deleted_study_logs = StudyLog.query.filter(StudyLog.study_date < cutoff_date).delete()
+            deleted_quiz_attempts = QuizAttempt.query.filter(QuizAttempt.attempt_date < cutoff_datetime).delete()
+            deleted_predictions = Prediction.query.filter(Prediction.generated_at < cutoff_datetime).delete()
+            deleted_recommendations = Recommendation.query.filter(Recommendation.generated_at < cutoff_datetime).delete()
+            
+            db.session.commit()
+            if deleted_study_logs or deleted_quiz_attempts or deleted_predictions or deleted_recommendations:
+                print(f"Data retention purge completed: {deleted_study_logs} study logs, "
+                      f"{deleted_quiz_attempts} quiz attempts, {deleted_predictions} predictions, "
+                      f"{deleted_recommendations} recommendations purged.")
         except Exception as e:
-            print(f"Error initializing database tables: {e}")
+            db.session.rollback()
+            print(f"Error during initialization or data retention purge: {e}")
 
     return app
 

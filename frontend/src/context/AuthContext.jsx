@@ -82,11 +82,21 @@ export const AuthProvider = ({ children }) => {
     return response.data.user;
   };
 
+  // Google OAuth Login handler
+  const loginWithGoogle = async (idToken) => {
+    const response = await axios.post('/api/auth/google', { id_token: idToken });
+    const { token: receivedToken, user: receivedUser } = response.data;
+    setToken(receivedToken);
+    setUser(receivedUser);
+    return receivedUser;
+  };
+
   const value = {
     user,
     token,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateProfile

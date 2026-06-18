@@ -65,6 +65,12 @@ def create_subject():
     if not name:
         return jsonify({'message': 'Subject name is required.'}), 400
 
+    if len(name) > 100:
+        return jsonify({'message': 'Subject name cannot exceed 100 characters.'}), 400
+
+    if len(description) > 500:
+        return jsonify({'message': 'Description cannot exceed 500 characters.'}), 400
+
     if Subject.query.filter_by(subject_name=name).first():
         return jsonify({'message': 'Subject name already exists.'}), 409
 
@@ -94,11 +100,16 @@ def update_subject(subject_id):
     description = data.get('description', '').strip()
 
     if name:
+        if len(name) > 100:
+            return jsonify({'message': 'Subject name cannot exceed 100 characters.'}), 400
         existing = Subject.query.filter_by(subject_name=name).first()
         if existing and existing.subject_id != subject_id:
             return jsonify({'message': 'Subject name already exists.'}), 409
         sub.subject_name = name
+
     if description is not None:
+        if len(description) > 500:
+            return jsonify({'message': 'Description cannot exceed 500 characters.'}), 400
         sub.description = description
 
     try:
@@ -147,6 +158,9 @@ def create_unit(subject_id):
     if not name:
         return jsonify({'message': 'Unit name is required.'}), 400
 
+    if len(name) > 100:
+        return jsonify({'message': 'Unit name cannot exceed 100 characters.'}), 400
+
     try:
         new_unit = Unit(subject_id=subject_id, unit_name=name)
         db.session.add(new_unit)
@@ -172,6 +186,8 @@ def update_unit(unit_id):
     name = data.get('unit_name', '').strip()
 
     if name:
+        if len(name) > 100:
+            return jsonify({'message': 'Unit name cannot exceed 100 characters.'}), 400
         unit.unit_name = name
 
     try:
@@ -226,6 +242,18 @@ def create_topic(unit_id):
     if not name:
         return jsonify({'message': 'Topic name is required.'}), 400
 
+    if len(name) > 100:
+        return jsonify({'message': 'Topic name cannot exceed 100 characters.'}), 400
+
+    if len(description) > 1000:
+        return jsonify({'message': 'Description cannot exceed 1000 characters.'}), 400
+
+    if est_hours < 0.0 or est_hours > 200.0:
+        return jsonify({'message': 'Estimated hours must be between 0 and 200.'}), 400
+
+    if difficulty not in ['Easy', 'Medium', 'Hard']:
+        return jsonify({'message': 'Difficulty level must be Easy, Medium, or Hard.'}), 400
+
     try:
         new_topic = Topic(
             unit_id=unit_id,
@@ -260,15 +288,24 @@ def update_topic(topic_id):
     difficulty = data.get('difficulty_level', '').strip()
 
     if name:
+        if len(name) > 100:
+            return jsonify({'message': 'Topic name cannot exceed 100 characters.'}), 400
         topic.topic_name = name
     if description is not None:
+        if len(description) > 1000:
+            return jsonify({'message': 'Description cannot exceed 1000 characters.'}), 400
         topic.description = description
     if est_hours is not None:
         try:
-            topic.estimated_hours = float(est_hours)
+            val = float(est_hours)
+            if val < 0.0 or val > 200.0:
+                return jsonify({'message': 'Estimated hours must be between 0 and 200.'}), 400
+            topic.estimated_hours = val
         except ValueError:
             return jsonify({'message': 'Estimated hours must be a number.'}), 400
     if difficulty:
+        if difficulty not in ['Easy', 'Medium', 'Hard']:
+            return jsonify({'message': 'Difficulty level must be Easy, Medium, or Hard.'}), 400
         topic.difficulty_level = difficulty
 
     try:

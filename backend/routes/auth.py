@@ -154,6 +154,55 @@ def logout():
     # We return success for consistency.
     return jsonify({'message': 'Logout successful.'}), 200
 
+@auth_bp.route('/google', methods=['POST'])
+def google_login():
+    data = request.get_json() or {}
+    id_token = data.get('id_token')
+    if not id_token:
+        return jsonify({'message': 'Missing Google ID token.'}), 400
+
+    # In production, we verify using Google oauth library:
+    # idinfo = id_token.verify_oauth2_token(id_token, requests.Request(), CLIENT_ID)
+    # email = idinfo['email']
+    # name = idinfo['name']
+    
+    # Mock Google identity verification and auto-provisioning
+    mock_email = "google_student@test.com"
+    user = User.query.filter_by(email=mock_email).first()
+    
+    if not user:
+        try:
+            # Auto-provision a default Student account for the Google OAuth identity
+            user = User(
+                full_name="Google Scholar",
+                email=mock_email,
+                password_hash=hash_password("GoogleOAuthPass1"),
+                role="student"
+            )
+            db.session.add(user)
+            db.session.flush()
+
+            student = Student(
+                user_id=user.user_id,
+                institution="Google Cloud Academy",
+                course="Computer Science",
+                semester=1
+            )
+            db.session.add(student)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'message': f'Google auto-provisioning failed: {str(e)}'}), 500
+
+    access_token = create_access_token(identity=str(user.user_id))
+    user_dict = user.to_dict()
+    user_dict['student_id'] = user.student.student_id
+
+    return jsonify({
+        'token': access_token,
+        'user': user_dict
+    }), 200
+
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():

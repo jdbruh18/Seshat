@@ -4,6 +4,17 @@ A complete full-stack web application designed for students, teachers, and admin
 
 This project is built specifically as an **MCA (Master of Computer Applications) Artificial Intelligence & Machine Learning academic project**, focusing on clean modularity, simple deployment, and comprehensive viva preparation features.
 
+
+---
+
+## 🪶 The Tribute: Who is Seshat?
+
+**Seshat** (ancient Egyptian: *Sš3t*, meaning "she who scribes") was the ancient Egyptian goddess of writing, wisdom, knowledge, and measurement. 
+
+Often depicted with a seven-pointed star-like emblem above her head and dressed in a leopard-patterned robe representing the stars, Seshat served as the celestial scribe, librarian, and keeper of scrolls. She was believed to track time, map the movements of the cosmos, and record history, making her the ultimate historical patron of study and systematic learning.
+
+This application is named **Seshat** as a modern tribute to the ancient keeper of scrolls—reimagined as a digital academic assistant that maps syllabus progress to celestial constellations, measures cognitive learning cycles, and archives educational milestones.
+
 ---
 
 ## 🚀 Key Features

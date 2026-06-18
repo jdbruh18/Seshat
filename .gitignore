@@ -1,0 +1,19 @@
+# Virtual Environment
+backend/venv/
+backend/.env
+backend/database.db
+backend/__pycache__/
+backend/routes/__pycache__/
+
+# Node Modules
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Local binaries and node installations
+node/
+
+# Local Python cache
+__pycache__/
+*.pyc

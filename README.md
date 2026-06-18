@@ -134,6 +134,24 @@ The pre-trained model `ml/model.pkl` is already packaged in the project. If you 
     ```
     Open your browser and navigate to `http://localhost:3000`.
 
+### 4. Model Context Protocol (MCP) Server
+To expose the **Seshat** academic database and ML prediction models to external AI clients (like Cursor, Claude, or Gemini) using standard JSON-RPC over stdio:
+1.  Verify the backend virtual environment is active.
+2.  Start the MCP server:
+    ```bash
+    python mcp/mcp_server.py
+    ```
+3.  Add the server config to your AI desktop client settings. For example, in Cursor, add a new MCP server with Command: `python C:\path\to\Seshat\mcp\mcp_server.py` and Type: `stdio`.
+
+---
+
+## 🔒 Security, MCP, & Google Integrations
+
+*   **AES-256 Symmetric Encryption**: Student study log notes are encrypted before writing to the database using Fernet keys derived from the Flask application `SECRET_KEY`, and transparently decrypted on API retrieval.
+*   **1-Year Data Retention Purger**: Executes a startup retention query inside `app.py` that auto-deletes records (StudyLogs, QuizAttempts, Predictions) older than 365 days.
+*   **Google OAuth 2.0 & Analytics**: Features a Google Sign-In button on the Login page and a mock Google verify route in the backend that auto-provisions a Student account. Google Analytics tracking (gtag.js) is also pre-configured.
+*   **Remote Debugging**: Detailed instructions for Chrome DevTools debugging, CLI flags, and performance profiling are located in [browser_config.md](file:///C:/Users/MSI/.gemini/antigravity/scratch/academic_assistant/documentation/browser_config.md).
+
 ---
 
 ## 🧪 Verification & Automated Tests
